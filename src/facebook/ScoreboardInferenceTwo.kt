@@ -6,6 +6,14 @@ import org.junit.jupiter.api.Test
 class ScoreboardInferenceTwo {
 
     @Test
+    fun testMakeChange() {
+        // We're probably going to need to explore an exhaustive method to try to verify if the greedy
+        // make change method is correct wit these denominations.
+        val denominations = listOf(3, 2, 1)
+        println(makeChangeGreedy(7, denominations))
+    }
+
+    @Test
     fun test() {
         //assertEquals(4, meh(listOf(10, 9, 2, 1)))
 
@@ -26,28 +34,14 @@ class ScoreboardInferenceTwo {
 
     fun findSmallest(S: List<Int>): Int {
         // 30 / 35 test cases.
-        fun makeChange(v: Int): Pair<MutableMap<Int, Int>, MutableSet<Int>> {
-            // This will only work for a canonical coin set; we think 3, 2, 1 is canonical though
-            val dominations = listOf(3, 2, 1)
-            var r = v
-            var coins = mutableMapOf<Int, Int>()
-            var uniques = mutableSetOf<Int>()
-            dominations.forEach { d ->
-                val i = r / d
-                coins.put(d, i)
-                if (i != 0) {
-                    uniques.add(d)
-                }
-                r %= d
-            }
-            return Pair(coins, uniques)
-        }
+
+        val denominations = listOf(3, 2, 1)
 
         // A naive starting guess is that the largest value in the list controls how small the best outcome could be at best.
         // Make change from the largest score; this is the shortest possible representation of the best score.
         var sorted = S.sorted()
         var largest = sorted.last();
-        val changeForLargest = makeChange(largest)
+        val changeForLargest = makeChangeGreedy(largest, denominations)
         println("Change for largest value (" + largest + "): " + changeForLargest.first)
 
         // But this naive best guess clearly isn't complete.
@@ -58,7 +52,7 @@ class ScoreboardInferenceTwo {
         val tail = sorted.subList(0, sorted.size - 1)
         val usedInTail = mutableSetOf<Int>()
         tail.forEach { i ->
-            usedInTail.addAll(makeChange(i).second)
+            usedInTail.addAll(makeChangeGreedy(i, denominations).second)
         }
         println("Denominations used in the tail: $usedInTail")
 
@@ -69,7 +63,7 @@ class ScoreboardInferenceTwo {
         // Jenga fixes; looking for a pattern
 
         val b =
-            (usedInTail.contains(1) && !usedInBest.contains(1)) || (usedInTail.contains(2) && !usedInBest.contains(2))
+            (S.contains(1) && !usedInBest.contains(1)) || (S.contains(2) && !usedInBest.contains(2))
         val b1 = counts.getOrDefault(3, 0) > 0
         if (b && b1) {
             counts.set(3, counts[3]!! - 1)
@@ -78,7 +72,7 @@ class ScoreboardInferenceTwo {
         }
 
         // Split a 2 to make a 1
-        val b3 = (usedInTail.contains(1) && counts.getOrDefault(1, 0) == 0) && (counts.getOrDefault(2, 0) > 0)
+        val b3 = (S.contains(1) && counts.getOrDefault(1, 0) == 0) && (counts.getOrDefault(2, 0) > 0)
         if (b3) {
             counts.set(2, counts[2]!! - 1)
             counts.set(1, counts.getOrDefault(1, 0) + 2)
@@ -92,6 +86,22 @@ class ScoreboardInferenceTwo {
         // We can try to fizz these function but are limited in what checks we can to.
         // To try:
         // - Check that every value really can be built from our output? A failing on the too short side could be detected this way
+    }
+
+    fun makeChangeGreedy(v: Int, denominations: List<Int>): Pair<MutableMap<Int, Int>, MutableSet<Int>> {
+        // This will only work for a canonical coin set; we think 3, 2, 1 is canonical though
+        var r = v
+        var coins = mutableMapOf<Int, Int>()
+        var uniques = mutableSetOf<Int>()
+        denominations.forEach { d ->
+            val i = r / d
+            coins[d] = i
+            if (i != 0) {
+                uniques.add(d)
+            }
+            r %= d
+        }
+        return Pair(coins, uniques)
     }
 
 }
