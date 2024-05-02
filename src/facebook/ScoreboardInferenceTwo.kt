@@ -84,13 +84,6 @@ class ScoreboardInferenceTwo {
             counts.set(1, counts.getOrDefault(1, 0) + 2)
         }
 
-        // If we need a 1 but it does not appear in best has a 2, then we can replace 2 with 2 1s.
-        if (!S.contains(1) && counts.getOrDefault(1, 0) > 0 && counts.getOrDefault(3, 0) > 0) {
-            counts.set(1, counts.getOrDefault(1, 0) - 1)
-            counts.set(2, counts.getOrDefault(2, 0) + 2)
-            counts.set(3, counts.getOrDefault(3, 0) - 1)
-        }
-
         // The number of coins in our corrected change should now be the smallest possible which covers all our values
         return counts.map { it.value }.sum()
 
