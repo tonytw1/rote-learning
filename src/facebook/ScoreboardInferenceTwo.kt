@@ -27,6 +27,7 @@ class ScoreboardInferenceTwo {
     fun findSmallest(S: List<Int>): Int {
         // 30 / 35 test cases.
         fun makeChange(v: Int): Pair<MutableMap<Int, Int>, MutableSet<Int>> {
+            // This will only work for a canonical coin set; we think 3, 2, 1 is canonical though
             val dominations = listOf(3, 2, 1)
             var r = v
             var coins = mutableMapOf<Int, Int>()
