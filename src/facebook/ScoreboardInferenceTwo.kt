@@ -14,8 +14,9 @@ class ScoreboardInferenceTwo {
     fun testCoinSetIsReallyCanonical() {
         // Check the assumption that the coin set is canonical; seems to be
         val coins = listOf(3, 2, 1)
-        val us = listOf(50, 25, 20, 10, 5, 1)
-        val denominations = us + listOf(12)
+        val uk = listOf(50, 20, 10, 5, 1)
+        val us = listOf(50, 25, 20, 10, 5, 1)       // not canonical!
+        val denominations = coins
 
         fun fizz(v: Int) {
             val greedy = makeChangeGreedy(v, denominations).first.map { it.value }.sum()
@@ -32,13 +33,15 @@ class ScoreboardInferenceTwo {
     }
 
     private fun makeChangeExhaustive(v: Int, denominations: List<Int>): Int {
+        val meh = denominations.toSet()
+
         val cache = mutableMapOf<Pair<Int, Int>, Int>()
         fun visit(v: Int, d: Int): Int {
             val key = Pair(v, d)
             if (cache.contains(key)) {
                 return cache[key]!!
             }
-            val x = if (denominations.contains((v))) {
+            val x = if (meh.contains((v))) {
                 // Base case; we have an exact coin for this value; we have bottomed out
                 d
             } else if (v < denominations.min()) {
