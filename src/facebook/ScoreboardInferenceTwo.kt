@@ -5,12 +5,60 @@ import org.junit.jupiter.api.Test
 
 class ScoreboardInferenceTwo {
 
+    /*
+    1≤N≤500,000
+    1≤S≤1,000,000,000
+    */
+
     @Test
-    fun testMakeChange() {
-        // We're probably going to need to explore an exhaustive method to try to verify if the greedy
-        // make change method is correct wit these denominations.
-        val denominations = listOf(3, 2, 1)
-        println(makeChangeGreedy(7, denominations))
+    fun testCoinSetIsReallyCanonical() {
+        // Check the assumption that the coin set is canonical; seems to be
+        val coins = listOf(3, 2, 1)
+        val us = listOf(50, 25, 20, 10, 5, 1)
+        val denominations = us + listOf(12)
+
+        fun fizz(v: Int) {
+            val greedy = makeChangeGreedy(v, denominations).first.map { it.value }.sum()
+            val exhaustive = makeChangeExhaustive(v, denominations)
+            if (greedy != exhaustive) {
+                println("$v: $greedy != $exhaustive")
+            }
+            assertEquals(exhaustive, greedy)
+        }
+
+        for (i in 0..500) {
+            fizz(i)
+        }
+    }
+
+    private fun makeChangeExhaustive(v: Int, denominations: List<Int>): Int {
+        val cache = mutableMapOf<Pair<Int, Int>, Int>()
+        fun visit(v: Int, d: Int): Int {
+            val key = Pair(v, d)
+            if (cache.contains(key)) {
+                return cache[key]!!
+            }
+            val x = if (denominations.contains((v))) {
+                // Base case; we have an exact coin for this value; we have bottomed out
+                d
+            } else if (v < denominations.min()) {
+                // Base case; overreach
+                return Integer.MAX_VALUE
+            } else {
+                // Else step down and select the base path
+                denominations.map { c ->
+                    visit(v - c, d + 1)
+                }.min()
+            }
+            cache[key] = x
+            return x
+        }
+
+        val visit = visit(v, 1)
+        if (visit == Int.MAX_VALUE) {
+            return 0
+        }
+        return visit
     }
 
     @Test
